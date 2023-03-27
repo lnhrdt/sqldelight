@@ -3,12 +3,15 @@ package app.cash.sqldelight.intellij.lang.completion
 import app.cash.sqldelight.core.SqlDelightProjectService
 import app.cash.sqldelight.core.lang.SqlDelightLanguage
 import app.cash.sqldelight.core.lang.util.findChildOfType
+import app.cash.sqldelight.core.lang.util.sqFile
 import app.cash.sqldelight.dialect.api.SqlDelightDialect
 import com.alecstrong.sql.psi.core.psi.SqlCompoundSelectStmt
 import com.alecstrong.sql.psi.core.psi.SqlCreateTableStmt
 import com.alecstrong.sql.psi.core.psi.SqlStmtList
 import com.alecstrong.sql.psi.core.psi.SqlTableName
 import com.alecstrong.sql.psi.core.psi.SqlTypes
+import com.alecstrong.sql.psi.core.psi.TableElement
+import com.alecstrong.sql.psi.core.psi.SqlCompositeElement
 import com.intellij.codeInsight.completion.AddSpaceInsertHandler
 import com.intellij.codeInsight.completion.CompletionContributor
 import com.intellij.codeInsight.completion.CompletionInitializationContext.DUMMY_IDENTIFIER
@@ -141,6 +144,10 @@ class SqlDelightKeywordCompletionContributor : CompletionContributor() {
       override fun addItem(builder: PsiBuilder, text: String) {
         val error = findReportedError(builder)
         if (error < 0 || error != builder.rawTokenIndex()) {
+          val sqlPsi = builder.treeBuilt.psi as SqlCompositeElement
+          if (sqlPsi is TableElement && sqlPsi.sqFile().isSystemTable) {
+            return
+          }
           super.addItem(builder, text)
         }
       }

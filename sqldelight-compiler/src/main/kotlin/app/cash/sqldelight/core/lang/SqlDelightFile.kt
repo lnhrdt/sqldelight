@@ -8,9 +8,11 @@ import app.cash.sqldelight.dialect.api.TypeResolver
 import com.alecstrong.sql.psi.core.SqlFileBase
 import com.intellij.lang.Language
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.FileViewProvider
+import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.GlobalSearchScopesCore
@@ -74,6 +76,23 @@ abstract class SqlDelightFile(
       .reduce { totalScope, directoryScope -> totalScope.union(directoryScope) }
   }
 
+  private val systemTables get() = dialect.predefinedSystemSchema.map { predefinedSql ->
+    val factory = PsiFileFactory.getInstance(project)
+    val predefined = factory.createFileFromText(SqlDelightLanguage, predefinedSql) as SqlFileBase
+    predefined.putUserData(systemTableKey, Unit)
+    predefined
+  }
+
+  override fun baseContributorFiles(): List<SqlFileBase> {
+    val base = super.baseContributorFiles()
+    // Don't generate the system schema again (infinitive recursion).
+    return if (!isSystemTable) {
+      base + systemTables
+    } else {
+      base
+    }
+  }
+
   fun findDbFile(): SqlFileBase? {
     val module = module ?: return null
 
@@ -101,5 +120,13 @@ abstract class SqlDelightFile(
       )
     }
     return result
+  }
+
+  val isSystemTable: Boolean get() = getUserData(systemTableKey) == Unit
+
+  companion object {
+    // Each system table contains this marker which is used in baseContributorFiles to prevent recursion,
+    // as well as in IDEA to provide a user option to include system tables in auto-completion.
+    private val systemTableKey: Key<Unit> = Key.create("systemTable")
   }
 }

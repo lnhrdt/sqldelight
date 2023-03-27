@@ -22,12 +22,15 @@ class MigrationFile(
 
   override fun getFileType() = MigrationFileType
 
-  override fun baseContributorFile(): SqlFileBase? {
+  override fun baseContributorFiles(): List<SqlFileBase> {
+    val superContributors = super.baseContributorFiles()
     val module = module
     if (module == null || SqlDelightFileIndex.getInstance(module).deriveSchemaFromMigrations) {
-      return null
+      return superContributors
     }
 
-    return findDbFile()
+    val dbFile = findDbFile() ?: return superContributors
+
+    return superContributors + dbFile
   }
 }

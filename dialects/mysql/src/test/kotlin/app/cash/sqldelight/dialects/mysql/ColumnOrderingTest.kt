@@ -1,28 +1,12 @@
 package app.cash.sqldelight.dialects.mysql
 
-import com.alecstrong.sql.psi.core.SqlParserUtil
-import com.alecstrong.sql.psi.test.fixtures.compileFile
+import com.alecstrong.sql.psi.test.fixtures.compileFiles
 import com.google.common.truth.Truth.assertThat
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import java.io.File
 
 class ColumnOrderingTest {
-  @Before
-  fun before() {
-    File("build/tmp").deleteRecursively()
-  }
-
-  @After
-  fun after() {
-    SqlParserUtil.reset()
-    File("build/tmp").deleteRecursively()
-  }
-
   @Test fun `tables works correctly for include all`() {
-    MySqlDialect().setup()
-    compileFile(
+    compileFiles(
       """
       |CREATE TABLE test1 (
       |  id1 BIGINT NOT NULL,
@@ -48,34 +32,34 @@ class ColumnOrderingTest {
       |  MODIFY COLUMN id6 BIGINT AFTER id9,
       |  MODIFY COLUMN id7 VARCHAR(8);
       """.trimMargin(),
-      "1.s",
-    )
-    val file = compileFile(
       """
       |SELECT *
       |FROM test1;
       """.trimMargin(),
-      "test.s",
-    )
+      customInit = {
+        MySqlDialect().setup()
+      },
+    ) { (_, file) ->
 
-    assertThat(
-      file.sqlStmtList!!.stmtList.first().compoundSelectStmt!!.queryExposed()
-        .flatMap { it.columns }
-        .map { it.element.text },
-    ).containsExactly(
-      "id5",
-      "new14",
-      "new11",
-      "new16",
-      "id3",
-      "id7",
-      "new12",
-      "id8",
-      "new15",
-      "id9",
-      "id6",
-      "id10",
-      "new13",
-    ).inOrder()
+      assertThat(
+        file.sqlStmtList!!.stmtList.first().compoundSelectStmt!!.queryExposed()
+          .flatMap { it.columns }
+          .map { it.element.text },
+      ).containsExactly(
+        "id5",
+        "new14",
+        "new11",
+        "new16",
+        "id3",
+        "id7",
+        "new12",
+        "id8",
+        "new15",
+        "id9",
+        "id6",
+        "id10",
+        "new13",
+      ).inOrder()
+    }
   }
 }

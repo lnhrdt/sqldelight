@@ -7,13 +7,21 @@ import org.junit.runners.Parameterized.Parameters
 import java.io.File
 
 @RunWith(Parameterized::class)
-class Sqlite318FixturesTest(name: String, fixtureRoot: File) : FixturesTest(name, fixtureRoot) {
+class Sqlite318FixturesTest(name: String, fixtureRoot: File) : FixturesTest(
+  name = name,
+  fixtureRoot = fixtureRoot,
+  predefinedTables = SqliteDialect().predefinedSystemSchema,
+) {
   override fun setupDialect() {
     SqliteDialect().setup()
   }
 
   companion object {
-    private val fixtures = arrayOf("src/test/fixtures_upsert_not_supported", "src/test/fixtures_sqlite_3_18")
+    private val fixtures = arrayOf(
+      "src/test/fixtures_upsert_not_supported",
+      "src/test/fixtures_sqlite_3_18",
+      "src/test/predefined",
+    )
 
     @Suppress("unused")
     // Used by Parameterized JUnit runner reflectively.

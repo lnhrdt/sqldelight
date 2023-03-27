@@ -50,7 +50,6 @@ import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiManager
-import com.intellij.psi.impl.PsiDocumentManagerImpl
 import org.jetbrains.kotlin.idea.util.projectStructure.getModule
 import timber.log.Timber
 import java.io.PrintStream
@@ -206,8 +205,7 @@ class ProjectService(val project: Project) : SqlDelightProjectService, Disposabl
     ApplicationManager.getApplication().invokeLater {
       if (project.isDisposed) return@invokeLater
       Timber.i("Reparsing ${files.size} files")
-      (PsiDocumentManager.getInstance(project) as PsiDocumentManagerImpl)
-        .reparseFiles(files, true)
+      PsiDocumentManager.getInstance(project).reparseFiles(files, true)
     }
   }
 
