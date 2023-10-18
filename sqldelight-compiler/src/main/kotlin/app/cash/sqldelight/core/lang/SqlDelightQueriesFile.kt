@@ -41,7 +41,8 @@ import com.intellij.psi.util.parentOfType
 
 class SqlDelightQueriesFile(
   viewProvider: FileViewProvider,
-) : SqlDelightFile(viewProvider, SqlDelightLanguage),
+  systemTables: List<SqlDelightFile>,
+) : SqlDelightFile(viewProvider, SqlDelightLanguage, systemTables),
   SqlAnnotatedElement {
   override val packageName by lazy {
     module?.let { module ->

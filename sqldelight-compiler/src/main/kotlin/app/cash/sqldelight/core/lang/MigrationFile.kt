@@ -6,7 +6,8 @@ import com.intellij.psi.FileViewProvider
 
 class MigrationFile(
   viewProvider: FileViewProvider,
-) : SqlDelightFile(viewProvider, MigrationLanguage) {
+  systemTables: List<SqlDelightFile>,
+) : SqlDelightFile(viewProvider, MigrationLanguage, systemTables) {
   val version: Long by lazy {
     name.substringBeforeLast(".$MIGRATION_EXTENSION")
       .filter { it in '0'..'9' }.toLongOrNull() ?: 0
