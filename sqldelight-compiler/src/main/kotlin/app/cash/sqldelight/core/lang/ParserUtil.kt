@@ -15,6 +15,7 @@ import java.util.ServiceLoader
 internal class ParserUtil {
   internal var dialect: Class<out SqlDelightDialect>? = null
   internal lateinit var systemTables: List<SqlDelightFile>
+    private set
 
   fun initializeDialect(project: Project) {
     val newDialect = SqlDelightProjectService.getInstance(project).dialect
